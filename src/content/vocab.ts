@@ -423,9 +423,26 @@ const DHAMMA_TERMS: Vocab[] = [
   noun('lakkhana', 'lakkhaṇa', 'លក្ខណៈ', 'characteristic', 'a', 'nt', ['abhidhamma', 'commentary']),
 ];
 
+/* ------------------------------------------------------------- pronouns */
+
+const pron = (id: string, pali: string, km: string, en: string, note?: string): Vocab =>
+  ({ id, pali, km, en, pos: 'pron', tags: ['pronoun', 'core'], note });
+
+const PRONOUN_ENTRIES: Vocab[] = [
+  pron('amha', 'ahaṃ', 'ខ្ញុំ', 'I', 'ប្រែពិសេស៖ អហំ, មំ, មយា, មម/មយ្ហំ, មយិ។ ពហុវចនៈ មយំ, អម្ហេ, អម្ហាកំ។'),
+  pron('tumha', 'tvaṃ', 'អ្នក', 'you', 'ត្វំ, តំ, តយា, តវ/តុយ្ហំ។ ពហុវចនៈ តុម្ហេ, តុម្ហាកំ។'),
+  pron('ta_m', 'so', 'គាត់, នោះ (បុល្លិង្គ)', 'he, that', 'សោ, តំ, តេន, តស្ស, តស្មិំ។ ពហុវចនៈ តេ, តេសំ, តេសុ។'),
+  pron('ta_f', 'sā', 'នាង, នោះ (ឥត្ថីលិង្គ)', 'she, that', 'សា, តំ, តាយ, តស្សា។ ពហុវចនៈ តា/តាយោ, តាសំ។'),
+  pron('ta_nt', 'taṃ', 'វា, នោះ (នបុំសកលិង្គ)', 'it, that', 'តំ, តេន, តស្ស។ ពហុវចនៈ តានិ, តេសំ។'),
+  pron('ima_m', 'ayaṃ', 'នេះ', 'this', 'អយំ, ឥមំ, ឥមិនា, ឥមស្ស។ ពហុវចនៈ ឥមេ, ឥមេសំ។'),
+  pron('ya_m', 'yo', 'ដែល, អ្នកណា', 'who, which', 'សព្វនាមសម្ពន្ធ។ ច្រើនប្រើគូនឹង ត៖ យោ … សោ … = អ្នកណា … អ្នកនោះ …។'),
+  pron('ka_m', 'ko', 'អ្នកណា?, អ្វី?', 'who?, what?', 'សព្វនាមសំណួរ៖ កោ, កំ, កេន, កស្ស, កស្មា។'),
+  pron('sura', 'surā', 'សុរា, ស្រា', 'liquor'),
+];
+
 export const VOCAB: Vocab[] = [
   ...CHANT, ...PEOPLE, ...THINGS, ...FEMININE, ...OTHER_STEMS,
-  ...VERBS, ...ADJECTIVES, ...INDECLINABLES, ...DHAMMA_TERMS,
+  ...VERBS, ...ADJECTIVES, ...INDECLINABLES, ...DHAMMA_TERMS, ...PRONOUN_ENTRIES,
 ];
 
 export const VOCAB_BY_ID = new Map(VOCAB.map((v) => [v.id, v]));

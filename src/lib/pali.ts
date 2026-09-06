@@ -127,9 +127,13 @@ function renderWord(word: string): string {
   return out;
 }
 
+/** Khmer texts close a sentence with ។ and a section with ៕, not with a dot. */
+const PUNCTUATION: Readonly<Record<string, string>> = { '.': '។', ';': '។', '|': '។', '||': '៕' };
+
 /**
- * Convert IAST Pali to Khmer script. Spaces and punctuation pass through;
- * hyphens mark a compound seam and are dropped the way Khmer prints compounds.
+ * Convert IAST Pali to Khmer script. Spaces pass through, punctuation is
+ * converted to its Khmer equivalent, and hyphens mark a compound seam and are
+ * dropped the way Khmer prints compounds.
  */
 export function toKhmer(text: string): string {
   return normalizeIast(text)
@@ -139,7 +143,8 @@ export function toKhmer(text: string): string {
       const lead = chunk.match(/^[^\p{L}]*/u)?.[0] ?? '';
       const tail = chunk.match(/[^\p{L}ṃ]*$/u)?.[0] ?? '';
       const core = chunk.slice(lead.length, chunk.length - tail.length);
-      return lead + core.split('-').map(renderWord).join('') + tail;
+      const punct = (run: string) => [...run].map((ch) => PUNCTUATION[ch] ?? ch).join('');
+      return punct(lead) + core.split('-').map(renderWord).join('') + punct(tail);
     })
     .join('');
 }
