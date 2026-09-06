@@ -7,6 +7,7 @@ import { GRAMMAR, GRAMMAR_BY_ID } from '../src/content/grammar.ts';
 import { UNITS, LESSONS } from '../src/content/curriculum.ts';
 import { ALL_LETTERS, LETTER_BY_IAST } from '../src/content/alphabet.ts';
 import { toKhmer } from '../src/lib/pali.ts';
+import { TAG_KM, tagLabel } from '../src/content/tags.ts';
 
 /**
  * Content integrity. A broken reference here would show a learner an empty
@@ -97,4 +98,13 @@ test('the path runs from foundations to advanced without gaps', () => {
     assert.ok(unit.kmTitle.trim() && unit.kmGoal.trim(), `${unit.id} is missing Khmer copy`);
   }
   assert.ok(LESSONS.length >= 80);
+});
+
+test('the tags a learner can see all have Khmer labels', () => {
+  // Tags that surface in the weak-area list must never appear untranslated.
+  const surfaced = new Set(VOCAB.flatMap((v) => v.tags));
+  const missing = [...surfaced].filter((t) => !TAG_KM[t] && !/^u\d+$/.test(t) && !/^level\d$/.test(t));
+  assert.deepEqual(missing, [], `tags without a Khmer label: ${missing.join(', ')}`);
+  assert.equal(tagLabel('declension'), 'ការប្រែនាម (វិភត្តិ)');
+  assert.equal(tagLabel('brand-new-tag'), 'brand-new-tag');
 });

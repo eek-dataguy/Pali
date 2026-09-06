@@ -9,9 +9,15 @@ import { Bar, Pill } from './ui';
  * Runs one session.
  *
  * Wrong answers are pushed back onto the end of the queue rather than dismissed,
- * so a lesson cannot be finished while something in it is still unlearned —
- * the session length adapts to the learner instead of the other way round.
+ * so a lesson cannot be finished while something in it is still unlearned — the
+ * session length adapts to the learner instead of the other way round. That
+ * retry is capped, though: an item a learner cannot get right today should not
+ * hold the lesson open indefinitely, and the scheduler will bring it back
+ * tomorrow anyway, which is the right place for it.
  */
+
+/** How many times one exercise may come back inside a single session. */
+const MAX_RETRIES = 2;
 
 export type LessonResult = {
   answered: number;
@@ -38,6 +44,7 @@ export function LessonRunner({
 
   const shownAt = useRef(Date.now());
   const startedAt = useRef(Date.now());
+  const retries = useRef(new Map<string, number>());
 
   const current = queue[position];
   const ready = current?.kind === 'teach' || hasAnswer(answer);
@@ -133,7 +140,7 @@ export function LessonRunner({
               {'explain' in current && current.explain && (
                 <p className="mt-1 text-sm text-stone-600">{current.explain}</p>
               )}
-              {!checked.correct && (
+              {!checked.correct && (retries.current.get(current.id) ?? 0) < MAX_RETRIES && (
                 <p className="mt-1 text-xs text-stone-500">សំណួរនេះនឹងត្រលប់មកវិញនៅចុងមេរៀន។</p>
               )}
             </div>

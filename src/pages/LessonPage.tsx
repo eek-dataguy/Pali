@@ -10,6 +10,7 @@ export default function LessonPage({ lessonId }: { lessonId?: string }) {
   const lesson = lessonId ? LESSON_BY_ID.get(lessonId) : undefined;
   const cards = useStore((s) => s.cards);
   const audio = useStore((s) => s.profile.audio);
+  const script = useStore((s) => s.profile.script);
   const finishLesson = useStore((s) => s.finishLesson);
 
   /* Built once per mount: rebuilding on every keystroke would reshuffle the
@@ -17,6 +18,7 @@ export default function LessonPage({ lessonId }: { lessonId?: string }) {
   const exercises = useMemo(
     () => (lesson ? buildLesson(lesson, {
       audio: audio && audioAvailable(),
+      script,
       dueCards: dueCardIds(cards).slice(0, 8),
       seed: Date.now(),
     }) : []),

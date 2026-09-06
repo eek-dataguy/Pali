@@ -120,7 +120,12 @@ export function DataTable({
           {rows.map((row, i) => (
             <tr key={i} className={i % 2 ? 'bg-stone-50/60' : ''}>
               {row.map((cell, j) => (
-                <td key={j} className={`px-3 py-2 align-top ${j === 0 ? 'font-medium text-stone-600' : 'pali-iast'}`}>
+                <td
+                  key={j}
+                  className={`whitespace-pre-line px-3 py-2 align-top ${
+                    j === 0 ? 'font-medium text-stone-600' : 'pali-iast'
+                  }`}
+                >
                   {cell}
                 </td>
               ))}

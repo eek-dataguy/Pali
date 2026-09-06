@@ -498,11 +498,13 @@ function passageExercises(passageId: string, rand: () => number): Exercise[] {
 
 /* ------------------------------------------------------ grammar exercises - */
 
-function grammarExercises(grammarId: string, rand: () => number): Exercise[] {
+function grammarExercises(
+  grammarId: string, rand: () => number, script: ScriptMode = 'both',
+): Exercise[] {
   const g = grammarById(grammarId);
   if (!g) return [];
   const card = cardIds.grammar(grammarId);
-  const table = g.paradigm ? paradigmTable(g.paradigm) : g.tables?.[0];
+  const table = g.paradigm ? paradigmTable(g.paradigm, script) : g.tables?.[0];
   const out: Exercise[] = [{
     kind: 'teach', id: `${card}:teach`, card, tags: ['grammar', ...g.tags],
     heading: g.kmTitle,
@@ -555,9 +557,23 @@ function metreExercises(rand: () => number): Exercise[] {
   });
 }
 
+/** Which script the learner reads Pali in; paradigm tables follow it. */
+export type ScriptMode = 'khmer' | 'iast' | 'both';
+
+/** Format one set of alternative forms for a table cell. */
+function showForms(forms: string[], script: ScriptMode): string {
+  const shown = forms.map((f) => {
+    if (script === 'iast') return f;
+    if (script === 'khmer') return toKhmer(f);
+    return `${toKhmer(f)} · ${f}`;
+  });
+  return shown.join(script === 'both' ? '\n' : ' / ');
+}
+
 /** Render a paradigm as a display table, generated rather than typed out. */
 export function paradigmTable(
   p: NonNullable<import('../content/types').GrammarPoint['paradigm']>,
+  script: ScriptMode = 'both',
 ): { caption: string; headers: string[]; rows: string[][] } {
   if (p.kind === 'verb') {
     const entry = VOCAB.find((v) => v.pali === p.lemma || v.id === p.lemma);
@@ -569,7 +585,7 @@ export function paradigmTable(
       rows: ([3, 2, 1] as Person[]).flatMap((person) =>
         (['sg', 'pl'] as Numb[]).map((n) => [
           `${PERSON_INFO[person].km} ${NUMBER_INFO[n].km}`,
-          ...tenses.map((t) => table[t][`${person}.${n}`].join(' / ')),
+          ...tenses.map((t) => showForms(table[t][`${person}.${n}`], script)),
         ]),
       ),
     };
@@ -581,8 +597,8 @@ export function paradigmTable(
     headers: ['វិភត្តិ', 'ឯកវចនៈ', 'ពហុវចនៈ'],
     rows: ALL_CASES.map((c) => [
       `${CASE_INFO[c].km}`,
-      table[c].sg.join(' / '),
-      table[c].pl.join(' / '),
+      showForms(table[c].sg, script),
+      showForms(table[c].pl, script),
     ]),
   };
 }
@@ -591,6 +607,8 @@ export function paradigmTable(
 
 export type SessionOptions = {
   audio: boolean;
+  /** Script the learner reads Pali in; controls generated paradigm tables. */
+  script?: ScriptMode;
   /** Card ids that are due for review and should be folded into the lesson. */
   dueCards?: CardId[];
   /** Target number of graded exercises. */
@@ -634,7 +652,7 @@ export function buildLesson(lesson: Lesson, opts: SessionOptions = { audio: fals
     for (const ex of items) (ex.kind === 'teach' ? teaching : practice).push(ex);
   };
 
-  for (const id of lesson.grammar ?? []) add(grammarExercises(id, rand));
+  for (const id of lesson.grammar ?? []) add(grammarExercises(id, rand, opts.script ?? 'both'));
   for (const iast of lesson.letters ?? []) add(letterExercises(iast, rand));
   for (const id of lesson.vocab ?? []) {
     const v = vocabById(id);

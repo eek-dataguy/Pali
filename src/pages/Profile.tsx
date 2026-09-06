@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { LESSONS } from '../content/curriculum';
+import { tagLabel } from '../content/tags';
 import { describeCard } from '../lib/exercises';
 import { audioAvailable, isApproximateVoice } from '../lib/audio';
 import {
@@ -79,7 +80,7 @@ export default function Profile() {
                 style={{ height: `${(n / maxForecast) * 100}%`, minHeight: n ? 3 : 0 }}
                 title={`${n}`}
               />
-              <span className="text-[9px] text-stone-400">{i === 0 ? 'ថ្ងៃនេះ' : i}</span>
+              <span className="text-[9px] text-stone-400">{i === 0 ? 'ថ្ងៃនេះ' : khmerNumber(i)}</span>
             </div>
           ))}
         </div>
@@ -103,10 +104,10 @@ export default function Profile() {
           <div className="space-y-2">
             {weak.slice(0, 5).map((w) => (
               <div key={w.tag} className="flex items-center gap-3">
-                <span className="w-28 shrink-0 truncate text-sm">{w.tag}</span>
+                <span className="w-32 shrink-0 truncate text-sm">{tagLabel(w.tag)}</span>
                 <Bar value={w.accuracy} />
-                <span className="w-10 shrink-0 text-right text-xs text-stone-500">
-                  {Math.round(w.accuracy * 100)}%
+                <span className="w-12 shrink-0 text-right text-xs text-stone-500">
+                  {khmerNumber(Math.round(w.accuracy * 100))}%
                 </span>
               </div>
             ))}
@@ -122,7 +123,7 @@ export default function Profile() {
               return (
                 <span key={f.id} className="rounded-lg bg-stone-100 px-2 py-1 text-xs">
                   <span className="pali-iast">{d.title}</span>
-                  <span className="ml-1 text-stone-400">{Math.round(f.r * 100)}%</span>
+                  <span className="ml-1 text-stone-400">{khmerNumber(Math.round(f.r * 100))}%</span>
                 </span>
               );
             })}

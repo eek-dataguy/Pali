@@ -107,11 +107,12 @@ function AlphabetTab() {
 
 function GrammarTab() {
   const [open, setOpen] = useState<string | null>(null);
+  const script = useStore((s) => s.profile.script);
   return (
     <div className="space-y-2">
       {GRAMMAR.map((point) => {
         const expanded = open === point.id;
-        const table = point.paradigm ? paradigmTable(point.paradigm) : point.tables?.[0];
+        const table = point.paradigm ? paradigmTable(point.paradigm, script) : point.tables?.[0];
         return (
           <div key={point.id} className="card overflow-hidden">
             <button
