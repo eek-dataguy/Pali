@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-stone-50 text-stone-900 font-khmer antialiased;
+    /* Khmer script needs more vertical room than Latin to avoid clipped
+       subscripts (ជើង) and stacked vowel signs. */
+    line-height: 1.9;
+  }
+
+  /* Pali set in Khmer script: larger and roomier, the way scripture is printed. */
+  .pali-khmer {
+    @apply font-pali;
+    font-size: 1.15em;
+    line-height: 2.1;
+  }
+
+  .pali-iast {
+    @apply font-iast;
+    font-style: normal;
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-stone-200 bg-white shadow-sm;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold
+           transition active:scale-[.98] disabled:opacity-40 disabled:active:scale-100;
+  }
+
+  .btn-primary {
+    @apply btn bg-leaf-500 text-white shadow-[0_4px_0_#216e30] hover:bg-leaf-400
+           active:shadow-[0_1px_0_#216e30] active:translate-y-[3px] disabled:shadow-none;
+  }
+
+  .btn-ghost {
+    @apply btn border-2 border-stone-200 bg-white text-stone-700 hover:border-stone-300;
+  }
+
+  /* Answer buttons get a chunky pressable edge, like a physical key. */
+  .option {
+    @apply w-full rounded-2xl border-2 border-stone-200 bg-white px-4 py-4 text-left
+           shadow-[0_3px_0_#e7e5e4] transition active:translate-y-[3px] active:shadow-none;
+  }
+
+  .option-selected {
+    @apply border-sky-400 bg-sky-50 shadow-[0_3px_0_#7dd3fc];
+  }
+
+  .option-correct {
+    @apply border-leaf-400 bg-leaf-50 shadow-[0_3px_0_#92dfa0];
+  }
+
+  .option-wrong {
+    @apply border-red-400 bg-red-50 shadow-[0_3px_0_#fca5a5];
+  }
+}
