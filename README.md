@@ -41,7 +41,7 @@ that, the Canon opens.
 | Dictionary | 280 entries with Khmer and English glosses |
 | Grammar | 34 points in Khmer, using traditional terms (បឋមាវិភត្តិ, បុព្វកិរិយា…) |
 | Reading | 10 texts, glossed word by word with a full grammatical parse |
-| Exercises | 1,061 generated across the course, plus unlimited drill generation |
+| Exercises | 1,110 generated across the course, plus unlimited drill generation |
 | Paradigms | 15 noun classes, 5 tenses × 6 persons, participles, 8 pronoun tables |
 
 The reading corpus runs from នមោ តស្ស through Dhammapada 1 and 183, the
@@ -53,9 +53,13 @@ verse of the Abhidhammatthasaṅgaha.
 
 Recognition and production multiple choice · Khmer-script ↔ romanisation ·
 free typing (diacritics optional, Khmer script accepted) · listening ·
-sentence building from word tiles · cloze · grammatical parsing
-("which case is ភិក្ខូនំ?") · generated declension and conjugation drills ·
-metre drills (គរុ / លហុ).
+recitation aloud · sentence building from word tiles · cloze · grammatical
+parsing ("which case is ភិក្ខូនំ?") · generated declension and conjugation
+drills · metre drills (គរុ / លហុ).
+
+All four skills are covered: reading through the glossed corpus, writing
+through free typing and the composition unit, listening through audio drills,
+and speaking through recitation.
 
 ## Personalisation
 
@@ -82,12 +86,16 @@ the browser's storage, and can be exported to JSON and imported on another
 device. That keeps the app free to host, private by construction, and usable
 offline — which matters in a temple with poor connectivity.
 
-## A note on the audio
+## A note on the audio and the microphone
 
-No browser ships a Pali voice. Listening exercises borrow the nearest available
-Indic voice, which renders Pali syllables far better than an English one but is
-still an approximation, and the app says so where it matters. **Take your
-teacher's recitation as authoritative, not the synthesiser.**
+No browser ships a Pali voice, and no engine recognises Pali. Listening
+exercises borrow the nearest available Indic voice, which renders Pali
+syllables far better than an English one but is still an approximation.
+Recitation drills will run speech recognition in a nearby locale where the
+browser offers it, but treat the transcript as a hint only — the grade is the
+learner's own judgement, and the app says so plainly.
+
+**Take your teacher's recitation as authoritative, not the synthesiser.**
 
 ## Licence and sources
 
