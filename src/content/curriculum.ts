@@ -48,8 +48,10 @@ export const UNITS: Unit[] = [
         { letters: ['p', 'ph', 'b', 'bh', 'm'] }),
       L('l2_4', 'អវគ្គ', 'The remaining consonants', 'alphabet', 15,
         { letters: ['y', 'r', 'l', 'v', 's', 'h', 'ḷ'] }),
-      L('l2_5', 'ព្យញ្ជនៈជើង និងនិគ្គហិត', 'Clusters and niggahita', 'grammar', 20,
-        { letters: ['ṃ'], grammar: ['g03', 'g04'] }),
+      L('l2_5', 'ព្យញ្ជនៈជើង និងនិគ្គហិត', 'Clusters and niggahita', 'grammar', 20, {
+        letters: ['ṃ'], grammar: ['g03', 'g04'],
+        vocab: ['dhamma', 'buddha', 'sangha', 'metta', 'panna', 'vinnana', 'nibbana'],
+      }),
       L('l2_6', 'ត្រួតពិនិត្យ ២', 'Checkpoint 2', 'checkpoint', 30,
         { letters: ['ṭ', 'ṭh', 'ḍ', 'ḍh', 'ṇ', 't', 'th', 'd', 'dh', 'n', 'p', 'ph', 'b', 'bh', 'm', 'ṃ'] }),
     ],
@@ -147,7 +149,7 @@ export const UNITS: Unit[] = [
         drills: [{ lemma: 'buddha', cases: ['dat'], numbers: ['sg', 'pl'] }],
       }),
       L('l6_3', 'បញ្ចមី — ពី', 'Ablative', 'grammar', 20, {
-        grammar: ['g13'], sentences: ['s033'],
+        grammar: ['g13'], sentences: ['s033'], vocab: ['gama', 'nagara', 'pabbata', 'rukkha'],
         drills: [{ lemma: 'buddha', cases: ['abl'], numbers: ['sg', 'pl'] }],
       }),
       L('l6_4', 'ឆដ្ឋី — របស់', 'Genitive', 'grammar', 20, {
@@ -264,13 +266,16 @@ export const UNITS: Unit[] = [
     kmGoal: 'បំបែកប្រយោគវែងក្នុងព្រះសូត្រជាឃ្លាតូចៗ ដោយស្គាល់ -ត្វា, -ត, -តុំ, -ន្ត។',
     lessons: [
       L('l10_1', 'កិរិយាអតីត (-ត)', 'Past participle', 'grammar', 30, {
-        grammar: ['g24'], sentences: ['s053', 's070'],
+        grammar: ['g24'], sentences: ['s053', 's070', 's041'],
+        vocab: ['sunati', 'karoti', 'gacchati', 'passati', 'deseti', 'vadati'],
       }),
       L('l10_2', 'បុព្វកិរិយា (-ត្វា)', 'Absolutive', 'grammar', 30, {
-        grammar: ['g25'], sentences: ['s050', 's051'],
+        grammar: ['g25'], sentences: ['s050', 's051', 's073'],
+        vocab: ['ganhati', 'bhunjati', 'nisidati', 'titthati', 'labhati', 'pasidati'],
       }),
       L('l10_3', 'និមិត្តកិរិយា (-តុំ)', 'Infinitive', 'grammar', 25, {
         grammar: ['g26'], sentences: ['s054'],
+        vocab: ['icchati', 'agacchati', 'sunati', 'janati', 'karoti', 'bhavati_v'],
       }),
       L('l10_4', 'បច្ចុប្បន្នកិរិយា (-ន្ត)', 'Present participle', 'grammar', 30, {
         grammar: ['g27'], sentences: ['s052'],
@@ -287,7 +292,11 @@ export const UNITS: Unit[] = [
     title: 'Compounds',
     kmGoal: 'បំបែកសមាសវែងៗ ដូចអដ្ឋកថាធ្វើ។',
     lessons: [
-      L('l11_1', 'សមាស ៦ ប្រភេទ', 'The six compounds', 'grammar', 30, { grammar: ['g29'] }),
+      L('l11_1', 'សមាស ៦ ប្រភេទ', 'The six compounds', 'grammar', 30, {
+        grammar: ['g29'],
+        vocab: ['namarupa', 'salayatana', 'sikkhapada', 'panatipata', 'adinnadana', 'sammasambuddha', 'abhidhamma'],
+        sentences: ['s071', 's073'],
+      }),
       L('l11_2', 'បំបែកសមាសក្នុងសីល ៥', 'Compounds in the precepts', 'reading', 30, {
         passage: 'p_pancasila',
       }),
@@ -303,13 +312,13 @@ export const UNITS: Unit[] = [
     kmGoal: 'ស្តារពាក្យដើមឡើងវិញ ពេលពាក្យពីរបានភ្ជាប់គ្នា — ជំនាញចាំបាច់សម្រាប់វចនានុក្រម។',
     lessons: [
       L('l12_1', 'សន្ធិស្រៈ និងនិគ្គហិត', 'Vowel and niggahita sandhi', 'grammar', 30, {
-        grammar: ['g30'], sentences: ['s072'],
+        grammar: ['g30'], sentences: ['s072', 's081'], passage: 'p_mangala',
       }),
       L('l12_2', 'កម្មវាចក និងកិច្ចកិរិយា', 'Passive and gerundive', 'grammar', 30, {
-        grammar: ['g28'], sentences: ['s053', 's063'],
+        grammar: ['g28'], sentences: ['s053', 's063'], passage: 'p_metta',
       }),
       L('l12_3', 'ត្រួតពិនិត្យ ១២', 'Checkpoint 12', 'checkpoint', 50, {
-        sentences: ['s053', 's063', 's072'],
+        sentences: ['s053', 's063', 's072', 's081'], passage: 'p_mangala',
       }),
     ],
   },
@@ -331,7 +340,9 @@ export const UNITS: Unit[] = [
         sentences: ['s060', 's061', 's062', 's064'],
         vocab: ['anicca', 'dukkha_a', 'anatta', 'sankhara'],
       }),
-      L('l13_4', 'ឆន្ទ — គរុ និងលហុ', 'Metre', 'grammar', 30, { grammar: ['g34'] }),
+      L('l13_4', 'ឆន្ទ — គរុ និងលហុ', 'Metre', 'grammar', 30, {
+        grammar: ['g34'], passage: 'p_dhp183',
+      }),
       L('l13_5', 'ត្រួតពិនិត្យ ១៣', 'Checkpoint 13', 'checkpoint', 55, {
         passage: 'p_dhp1', sentences: ['s060', 's061'],
       }),
@@ -346,7 +357,9 @@ export const UNITS: Unit[] = [
       L('l14_1', 'អសេវនា ច ពាលានំ', 'Maṅgala Sutta, first verse', 'reading', 35, {
         passage: 'p_mangala', vocab: ['bala', 'pandita', 'pujeti'],
       }),
-      L('l14_2', 'ត្រួតពិនិត្យ ១៤', 'Checkpoint 14', 'checkpoint', 45, { passage: 'p_mangala' }),
+      L('l14_2', 'ត្រួតពិនិត្យ ១៤', 'Checkpoint 14', 'checkpoint', 45, {
+        passage: 'p_mangala', vocab: ['bala', 'pandita', 'pujeti', 'sabba', 'ca'],
+      }),
     ],
   },
   {
@@ -358,7 +371,10 @@ export const UNITS: Unit[] = [
       L('l15_1', 'ករណីយមត្ថកុសលេន', 'Mettā Sutta, opening', 'reading', 35, {
         passage: 'p_metta', vocab: ['metta', 'satta', 'sabba'],
       }),
-      L('l15_2', 'ត្រួតពិនិត្យ ១៥', 'Checkpoint 15', 'checkpoint', 45, { passage: 'p_metta' }),
+      L('l15_2', 'ត្រួតពិនិត្យ ១៥', 'Checkpoint 15', 'checkpoint', 45, {
+        passage: 'p_metta', vocab: ['metta', 'karuna', 'mudita', 'upekkha', 'satta', 'sabba'],
+        sentences: ['s042'],
+      }),
     ],
   },
   {
@@ -374,7 +390,10 @@ export const UNITS: Unit[] = [
         passage: 'p_dhammacakka',
         vocab: ['sacca', 'jati', 'jara', 'khandha', 'upadana', 'ariya'],
       }),
-      L('l16_3', 'របៀបវិភាគប្រយោគ', 'How to parse a sentence', 'grammar', 35, { grammar: ['g32'] }),
+      L('l16_3', 'របៀបវិភាគប្រយោគ', 'How to parse a sentence', 'grammar', 35, {
+        grammar: ['g32'],
+        sentences: ['s050', 's051', 's052', 's053', 's071', 's073'],
+      }),
       L('l16_4', 'ត្រួតពិនិត្យ ១៦', 'Checkpoint 16', 'checkpoint', 60, {
         passage: 'p_dhammacakka', sentences: ['s070', 's071'],
       }),
@@ -392,8 +411,14 @@ export const UNITS: Unit[] = [
         grammar: ['g33'], vocab: ['attha', 'adhippaya', 'vevacana', 'atthakatha', 'tika'],
         sentences: ['s080', 's081'],
       }),
-      L('l17_2', 'ហេតុអ្វីហៅថា ពុទ្ធ?', 'Why "Buddha"?', 'reading', 45, { passage: 'p_atthakatha' }),
-      L('l17_3', 'ត្រួតពិនិត្យ ១៧', 'Checkpoint 17', 'checkpoint', 60, { passage: 'p_atthakatha' }),
+      L('l17_2', 'ហេតុអ្វីហៅថា ពុទ្ធ?', 'Why "Buddha"?', 'reading', 45, {
+        passage: 'p_atthakatha', sentences: ['s080', 's081'],
+        vocab: ['attha', 'sacca', 'buddha', 'iti'],
+      }),
+      L('l17_3', 'ត្រួតពិនិត្យ ១៧', 'Checkpoint 17', 'checkpoint', 60, {
+        passage: 'p_atthakatha', sentences: ['s080', 's081', 's082'],
+        vocab: ['atthakatha', 'tika', 'adhippaya', 'vevacana'],
+      }),
     ],
   },
   {
@@ -410,7 +435,10 @@ export const UNITS: Unit[] = [
         vocab: ['khandha', 'vedana', 'sanna', 'sankhara', 'vinnana', 'ayatana', 'dhatu', 'phassa', 'namarupa'],
         sentences: ['s082'],
       }),
-      L('l18_3', 'ត្រួតពិនិត្យ ១៨', 'Checkpoint 18', 'checkpoint', 60, { passage: 'p_abhidhamma' }),
+      L('l18_3', 'ត្រួតពិនិត្យ ១៨', 'Checkpoint 18', 'checkpoint', 60, {
+        passage: 'p_abhidhamma', sentences: ['s082'],
+        vocab: ['citta', 'cetasika', 'rupa', 'nibbana', 'khandha', 'dhatu', 'ayatana'],
+      }),
     ],
   },
   {
@@ -434,13 +462,15 @@ export const UNITS: Unit[] = [
     kmGoal: 'តែងប្រយោគបាលីដោយខ្លួនឯង — ជាជំហានចុងក្រោយពីអ្នកអានទៅជាអ្នកប្រើ។',
     lessons: [
       L('l20_1', 'តែងប្រយោគសាមញ្ញ', 'Compose simple sentences', 'compose', 45, {
-        sentences: ['s001', 's010', 's013', 's020', 's030'],
+        sentences: ['s001', 's010', 's013', 's020', 's030', 's011', 's012'],
+        vocab: ['nara', 'buddha', 'dhamma', 'deseti', 'vandati'],
       }),
       L('l20_2', 'តែងប្រយោគមានបុព្វកិរិយា', 'Compose with absolutives', 'compose', 50, {
         sentences: ['s050', 's051', 's054'],
       }),
       L('l20_3', 'តែងបទបួងសួង', 'Compose a blessing', 'compose', 50, {
         sentences: ['s042'], passage: 'p_metta',
+        vocab: ['metta', 'satta', 'sabba', 'sukha_n', 'hoti'],
       }),
       L('l20_4', 'ត្រួតពិនិត្យចុងក្រោយ', 'Final checkpoint', 'checkpoint', 100, {
         sentences: ['s050', 's060', 's070'], passage: 'p_dhammacakka',
