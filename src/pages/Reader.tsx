@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PASSAGES, passageById } from '../content/passages';
 import type { Gloss, PassageLine } from '../content/types';
 import { chantingBreakdown } from '../lib/exercises';
-import { toKhmer } from '../lib/pali';
+import { khmerNumber, toKhmer } from '../lib/pali';
 import { speak } from '../lib/audio';
 import { navigate } from '../lib/router';
 import { useStore } from '../lib/store';
@@ -40,7 +40,7 @@ export default function Reader({ passageId }: { passageId?: string }) {
                 <span className="block font-semibold">{p.kmTitle}</span>
                 <span className="block text-xs text-stone-500">{p.kmSource}</span>
               </span>
-              <span className="shrink-0 text-xs text-stone-400">{p.lines.length} បាទ</span>
+              <span className="shrink-0 text-xs text-stone-400">{khmerNumber(p.lines.length)} បាទ</span>
             </div>
           </button>
         ))}

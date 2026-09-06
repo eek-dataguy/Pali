@@ -77,3 +77,18 @@ export const TAG_KM: Record<string, string> = {
 export function tagLabel(tag: string): string {
   return TAG_KM[tag] ?? tag;
 }
+
+/** Parts of speech, for the dictionary entry cards. */
+export const POS_KM: Record<string, string> = {
+  noun: 'នាមសព្ទ',
+  verb: 'កិរិយាសព្ទ',
+  adj: 'គុណនាម',
+  pron: 'សព្វនាម',
+  ind: 'និបាត',
+  num: 'សំខ្យា',
+  prefix: 'ឧបសគ្គ',
+};
+
+export function posLabel(pos: string): string {
+  return POS_KM[pos] ?? pos;
+}

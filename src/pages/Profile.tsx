@@ -61,7 +61,7 @@ export default function Profile() {
       <Section title="ការចងចាំរួម">
         <div className="flex items-center gap-4">
           <ProgressRing value={overallMastery(cards)} size={64} stroke={7} color="#35ac4b">
-            {Math.round(overallMastery(cards) * 100)}%
+            {khmerNumber(Math.round(overallMastery(cards) * 100))}%
           </ProgressRing>
           <div className="flex-1 text-sm text-stone-600">
             <p>សន្លឹកចងចាំសរុប៖ {khmerNumber(Object.keys(cards).length)}</p>
@@ -142,7 +142,7 @@ export default function Profile() {
                 className={`flex-1 rounded-lg border-2 py-2 text-sm font-semibold
                   ${profile.dailyGoal === v ? 'border-saffron-400 bg-saffron-50' : 'border-stone-200'}`}
               >
-                {v}
+                {khmerNumber(v)}
               </button>
             ))}
           </div>
@@ -158,7 +158,7 @@ export default function Profile() {
                 className={`flex-1 rounded-lg border-2 py-2 text-sm font-semibold
                   ${profile.newPerDay === v ? 'border-saffron-400 bg-saffron-50' : 'border-stone-200'}`}
               >
-                {v}
+                {khmerNumber(v)}
               </button>
             ))}
           </div>
@@ -182,6 +182,21 @@ export default function Profile() {
               </button>
             ))}
           </div>
+        </Setting>
+
+        <Setting label="ការសូត្រ">
+          <label className="flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              checked={profile.speaking}
+              onChange={(e) => store.setProfile({ speaking: e.target.checked })}
+              className="h-5 w-5 accent-saffron-500"
+            />
+            បន្ថែមលំហាត់សូត្រតាម (ការនិយាយ)
+          </label>
+          <p className="mt-2 text-xs text-stone-500">
+            កម្មវិធីស្គាល់សំឡេងមិនចេះភាសាបាលីទេ ដូច្នេះការវាយតម្លៃចុងក្រោយគឺដោយខ្លួនអ្នកផ្ទាល់។
+          </p>
         </Setting>
 
         <Setting label="សំឡេង">

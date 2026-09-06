@@ -78,6 +78,11 @@ export function describeCard(id: CardId): { title: string; km: string } {
   }
 }
 
+/** Syllable breakdown used by the pronunciation and chanting screens. */
+export function chantingBreakdown(pali: string): { text: string; heavy: boolean }[] {
+  return syllabify(pali).map((s) => ({ text: s.text, heavy: s.heavy }));
+}
+
 /* ---------------------------------------------------------- exercise types */
 
 type Base = { id: string; card: CardId; tags: string[] };
@@ -124,7 +129,16 @@ export type Exercise =
       explain?: string;
     })
   /** Hear it, then choose or type it. Only generated when a voice exists. */
-  | (Base & { kind: 'listen'; speak: string; options: { text: string; sub?: string }[]; answers: number[] });
+  | (Base & { kind: 'listen'; speak: string; options: { text: string; sub?: string }[]; answers: number[] })
+  /** Say it aloud. Graded by recognition where available, else self-assessed. */
+  | (Base & {
+      kind: 'speak';
+      text: string;
+      meaning: string;
+      /** Syllables with their metre weight, shown as a chanting guide. */
+      syllables: { text: string; heavy: boolean }[];
+      explain?: string;
+    });
 
 export type Graded = Exclude<Exercise, { kind: 'teach' }>;
 
@@ -378,7 +392,9 @@ function drillExercises(spec: DrillSpec, rand: () => number): Exercise[] {
 
 /* ----------------------------------------------------- sentence exercises - */
 
-function sentenceExercises(sentenceId: string, rand: () => number): Exercise[] {
+function sentenceExercises(
+  sentenceId: string, rand: () => number, speaking = false,
+): Exercise[] {
   const s = sentenceById(sentenceId);
   if (!s) return [];
   const card = cardIds.sentence(sentenceId);
@@ -415,6 +431,8 @@ function sentenceExercises(sentenceId: string, rand: () => number): Exercise[] {
     });
   }
 
+  if (speaking) out.push(speakExercise(card, s.pali, s.km, tags));
+
   /* Parse one content word: which case/number is it? */
   const parsable = s.words.filter((w) => w.gram && /វិភត្តិ|បឋមា|ទុតិយា|តតិយា|ចតុត្ថី|បញ្ចមី|ឆដ្ឋី|សត្តមី/.test(w.gram));
   const target = parsable[Math.floor(rand() * parsable.length)];
@@ -436,9 +454,32 @@ function sentenceExercises(sentenceId: string, rand: () => number): Exercise[] {
   return out;
 }
 
+/* -------------------------------------------------------- speaking drills - */
+
+/**
+ * Recitation practice. Chanting is how Pali is actually used aloud in Cambodia,
+ * so the prompt shows the syllable weights rather than only the words.
+ */
+function speakExercise(
+  card: CardId, text: string, meaning: string, tags: string[], explain?: string,
+): Exercise {
+  return {
+    kind: 'speak',
+    id: `${card}:speak`,
+    card,
+    tags: [...tags, 'speaking'],
+    text,
+    meaning,
+    syllables: chantingBreakdown(text),
+    explain,
+  };
+}
+
 /* ------------------------------------------------------ passage exercises - */
 
-function passageExercises(passageId: string, rand: () => number): Exercise[] {
+function passageExercises(
+  passageId: string, rand: () => number, speaking = false,
+): Exercise[] {
   const p = passageById(passageId);
   if (!p) return [];
   const out: Exercise[] = [];
@@ -470,6 +511,10 @@ function passageExercises(passageId: string, rand: () => number): Exercise[] {
         options: chosen.options, answers: [chosen.index],
         explain: l.note ?? l.km,
       });
+    }
+
+    if (speaking) {
+      out.push(speakExercise(card, l.pali, l.km, tags, l.note));
     }
 
     /* Cloze: blank one word out of the line and rebuild it from the gloss. */
@@ -609,6 +654,8 @@ export type SessionOptions = {
   audio: boolean;
   /** Script the learner reads Pali in; controls generated paradigm tables. */
   script?: ScriptMode;
+  /** Include recitation drills. */
+  speaking?: boolean;
   /** Card ids that are due for review and should be folded into the lesson. */
   dueCards?: CardId[];
   /** Target number of graded exercises. */
@@ -659,8 +706,9 @@ export function buildLesson(lesson: Lesson, opts: SessionOptions = { audio: fals
     if (v) add(vocabExercises(v, rand, { audio }));
   }
   for (const spec of lesson.drills ?? []) add(drillExercises(spec, rand));
-  for (const id of lesson.sentences ?? []) add(sentenceExercises(id, rand));
-  if (lesson.passage) add(passageExercises(lesson.passage, rand));
+  const speaking = opts.speaking ?? false;
+  for (const id of lesson.sentences ?? []) add(sentenceExercises(id, rand, speaking));
+  if (lesson.passage) add(passageExercises(lesson.passage, rand, speaking));
 
   const target = opts.target ?? (lesson.kind === 'checkpoint' ? 16 : 14);
 
@@ -735,7 +783,3 @@ export function buildTargetedPractice(
   return buildReview(cards, { ...opts, target: opts.target ?? 15 });
 }
 
-/** Syllable breakdown used by the pronunciation and chanting screens. */
-export function chantingBreakdown(pali: string): { text: string; heavy: boolean }[] {
-  return syllabify(pali).map((s) => ({ text: s.text, heavy: s.heavy }));
-}

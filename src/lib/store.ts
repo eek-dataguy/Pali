@@ -25,6 +25,8 @@ export type Profile = {
   script: ScriptPref;
   showEnglish: boolean;
   audio: boolean;
+  /** Include recitation drills, which ask the learner to chant aloud. */
+  speaking: boolean;
   /** Slower, clearer audio for chanting practice. */
   speechRate: number;
 };
@@ -63,6 +65,7 @@ const DEFAULT_PROFILE: Profile = {
   script: 'both',
   showEnglish: false,
   audio: true,
+  speaking: true,
   speechRate: 0.75,
 };
 

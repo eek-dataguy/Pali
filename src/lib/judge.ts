@@ -15,7 +15,9 @@ export type Answer =
   | { kind: 'none' }
   | { kind: 'choice'; index: number }
   | { kind: 'text'; value: string }
-  | { kind: 'bank'; order: number[] };
+  | { kind: 'bank'; order: number[] }
+  /** Recitation: either a recogniser's similarity score, or the learner's own call. */
+  | { kind: 'spoken'; confident: boolean };
 
 export const NO_ANSWER: Answer = { kind: 'none' };
 
@@ -25,6 +27,7 @@ export function hasAnswer(answer: Answer): boolean {
     case 'choice': return answer.index >= 0;
     case 'text': return answer.value.trim().length > 0;
     case 'bank': return answer.order.length > 0;
+    case 'spoken': return true;
     default: return false;
   }
 }
@@ -52,6 +55,8 @@ export function judge(exercise: Exercise, answer: Answer): boolean {
     case 'wordbank':
       return answer.kind === 'bank'
         && answer.order.map((i) => exercise.bank[i]).join(' ') === exercise.answer.join(' ');
+    case 'speak':
+      return answer.kind === 'spoken' && answer.confident;
     default:
       return false;
   }

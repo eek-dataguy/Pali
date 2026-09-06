@@ -49,6 +49,16 @@ test('a word bank must be in the right order', () => {
   assert.equal(judge(bank, { kind: 'bank', order: [0, 1] }), false);
 });
 
+test('recitation is graded by the learner\'s own judgement', () => {
+  const spoken = {
+    kind: 'speak', id: 'x', card: 'c', tags: [],
+    text: 'buddhaṃ saraṇaṃ gacchāmi', meaning: 'm', syllables: [],
+  };
+  assert.equal(judge(spoken, { kind: 'spoken', confident: true }), true);
+  assert.equal(judge(spoken, { kind: 'spoken', confident: false }), false);
+  assert.equal(hasAnswer({ kind: 'spoken', confident: false }), true, 'a "not yet" answer is still an answer');
+});
+
 test('teaching cards always pass, so they never block a session', () => {
   assert.equal(judge({ kind: 'teach', id: 't', card: 'c', tags: [], heading: 'h', notes: [] }, NO_ANSWER), true);
 });
@@ -61,7 +71,7 @@ test('teaching cards always pass, so they never block a session', () => {
 test('every generated exercise has a reachable correct answer', () => {
   let checked = 0;
   for (const lesson of LESSONS) {
-    for (const ex of buildLesson(lesson, { audio: true, seed: 42 })) {
+    for (const ex of buildLesson(lesson, { audio: true, speaking: true, seed: 42 })) {
       if (!isGraded(ex)) continue;
       checked++;
       let solved = false;
@@ -72,6 +82,8 @@ test('every generated exercise has a reachable correct answer', () => {
       } else if (ex.kind === 'wordbank') {
         const order = ex.answer.map((w) => ex.bank.indexOf(w));
         solved = !order.includes(-1) && judge(ex, { kind: 'bank', order });
+      } else if (ex.kind === 'speak') {
+        solved = judge(ex, { kind: 'spoken', confident: true });
       }
       assert.ok(solved, `${ex.id} (${ex.kind}) has no reachable correct answer`);
     }

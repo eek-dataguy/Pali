@@ -11,6 +11,7 @@ export default function LessonPage({ lessonId }: { lessonId?: string }) {
   const cards = useStore((s) => s.cards);
   const audio = useStore((s) => s.profile.audio);
   const script = useStore((s) => s.profile.script);
+  const speaking = useStore((s) => s.profile.speaking);
   const finishLesson = useStore((s) => s.finishLesson);
 
   /* Built once per mount: rebuilding on every keystroke would reshuffle the
@@ -19,6 +20,7 @@ export default function LessonPage({ lessonId }: { lessonId?: string }) {
     () => (lesson ? buildLesson(lesson, {
       audio: audio && audioAvailable(),
       script,
+      speaking,
       dueCards: dueCardIds(cards).slice(0, 8),
       seed: Date.now(),
     }) : []),

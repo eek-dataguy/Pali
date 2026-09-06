@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { exercisesForCard, isGraded } from '../lib/exercises';
 import type { Exercise } from '../lib/exercises';
 import { seededRandom } from '../lib/util';
+import { khmerNumber } from '../lib/pali';
 import { useStore } from '../lib/store';
 import { navigate } from '../lib/router';
 import { ExerciseView } from '../components/ExerciseView';
@@ -179,7 +180,7 @@ function Placement({ onDone }: { onDone: (unlockThrough: string | null) => void 
     <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-4 py-6">
       <div className="mb-6">
         <p className="mb-2 text-sm font-semibold text-stone-500">
-          តេស្តកម្រិត · សំណួរទី {index + 1} / {questions.length} · {PROBES[index]?.label}
+          តេស្តកម្រិត · សំណួរទី {khmerNumber(index + 1)} / {khmerNumber(questions.length)} · {PROBES[index]?.label}
         </p>
         <Bar value={index / questions.length} />
       </div>

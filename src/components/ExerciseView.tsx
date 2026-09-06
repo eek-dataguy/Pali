@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Exercise } from '../lib/exercises';
 import type { Answer } from '../lib/judge';
 import { toKhmer } from '../lib/pali';
 import { speak } from '../lib/audio';
+import { listenOnce, recognitionAvailable, similarity } from '../lib/speech';
 import { useStore } from '../lib/store';
 import { DataTable, ScriptHeading } from './ui';
 
@@ -35,6 +36,8 @@ export function ExerciseView(props: ExerciseViewProps) {
       return <TypeCard {...props} exercise={props.exercise} />;
     case 'wordbank':
       return <WordBankCard {...props} exercise={props.exercise} />;
+    case 'speak':
+      return <SpeakCard {...props} exercise={props.exercise} />;
     default:
       return null;
   }
@@ -243,6 +246,128 @@ function WordBankCard({
   );
 }
 
+/* -------------------------------------------------------------- speaking */
+
+/**
+ * Recitation practice.
+ *
+ * Speech engines do not know Pali, so a transcript is only ever a hint. The
+ * learner's own judgement is the grade — which is honest, and is how shadowing
+ * practice works. The syllable strip shows the chanting rhythm: គរុ syllables
+ * are held roughly twice as long as លហុ ones.
+ */
+function SpeakCard({
+  exercise, answer, onAnswer, revealed,
+}: ExerciseViewProps & { exercise: Extract<Exercise, { kind: 'speak' }> }) {
+  const rate = useStore((s) => s.profile.speechRate);
+  const audioOn = useStore((s) => s.profile.audio);
+  const [listening, setListening] = useState(false);
+  const [heard, setHeard] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
+  const chosen = answer.kind === 'spoken' ? answer.confident : null;
+
+  useEffect(() => {
+    setHeard(null);
+    setHint(null);
+    setListening(false);
+  }, [exercise.id]);
+
+  const record = async () => {
+    setListening(true);
+    setHint(null);
+    const result = await listenOnce();
+    setListening(false);
+    if (!result.ok) {
+      setHint(result.reason === 'denied'
+        ? 'មិនបានអនុញ្ញាតឲ្យប្រើមីក្រូហ្វូនទេ។ សូមវាយតម្លៃដោយខ្លួនឯង។'
+        : 'មិនបានឮសំឡេងច្បាស់ទេ។ សូមព្យាយាមម្តងទៀត ឬវាយតម្លៃដោយខ្លួនឯង។');
+      return;
+    }
+    setHeard(result.transcript);
+    const score = similarity(exercise.text, result.transcript);
+    setHint(score >= 0.45
+      ? 'ស្តាប់ទៅជិតត្រូវហើយ។ ប៉ុន្តែកម្មវិធីស្គាល់សំឡេងមិនចេះភាសាបាលីទេ — សូមប្រៀបធៀបនឹងការសូត្ររបស់គ្រូ។'
+      : 'ហាក់ដូចជាមិនទាន់ត្រូវ។ សូមស្តាប់ម្តងទៀត រួចសូត្រតាម។');
+    onAnswer({ kind: 'spoken', confident: score >= 0.45 });
+  };
+
+  return (
+    <div className="space-y-5">
+      <p className="text-lg font-semibold text-stone-800">សូត្រតាមឲ្យបានច្បាស់</p>
+
+      <div className="rounded-2xl bg-saffron-50 px-4 py-5">
+        <ScriptHeading pali={exercise.text} />
+        <p className="mt-3 text-center text-stone-700">{exercise.meaning}</p>
+      </div>
+
+      <div>
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {exercise.syllables.map((syllable, i) => (
+            <span
+              key={i}
+              className={`rounded px-2 py-0.5 text-sm ${
+                syllable.heavy ? 'bg-saffron-200 text-saffron-900' : 'bg-stone-100 text-stone-600'
+              }`}
+            >
+              {syllable.text}
+            </span>
+          ))}
+        </div>
+        <p className="mt-2 text-center text-xs text-stone-500">
+          ពណ៌លឿង = គរុ (សូត្រវែង) · ពណ៌ប្រផេះ = លហុ (សូត្រខ្លី)
+        </p>
+      </div>
+
+      <div className="flex gap-2">
+        {audioOn && (
+          <button type="button" onClick={() => speak(exercise.text, rate)} className="btn-ghost flex-1 py-3">
+            🔊 ស្តាប់គំរូ
+          </button>
+        )}
+        {recognitionAvailable() && (
+          <button
+            type="button"
+            onClick={record}
+            disabled={listening || revealed}
+            className="btn-ghost flex-1 py-3"
+          >
+            {listening ? '🎙 កំពុងស្តាប់…' : '🎙 សូត្រ'}
+          </button>
+        )}
+      </div>
+
+      {heard && (
+        <p className="rounded-xl bg-stone-100 px-3 py-2 text-sm text-stone-600">
+          កម្មវិធីឮថា៖ <span className="font-medium">{heard}</span>
+        </p>
+      )}
+      {hint && <p className="text-sm text-stone-600">{hint}</p>}
+
+      <div>
+        <p className="mb-2 text-sm font-semibold text-stone-600">តើអ្នកសូត្របានស្ទាត់ហើយឬនៅ?</p>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            disabled={revealed}
+            onClick={() => onAnswer({ kind: 'spoken', confident: false })}
+            className={`option text-center ${chosen === false ? 'option-selected' : ''}`}
+          >
+            មិនទាន់ស្ទាត់
+          </button>
+          <button
+            type="button"
+            disabled={revealed}
+            onClick={() => onAnswer({ kind: 'spoken', confident: true })}
+            className={`option text-center ${chosen === true ? 'option-selected' : ''}`}
+          >
+            ស្ទាត់ហើយ
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Shown in the feedback bar after a wrong answer. */
 export function CorrectAnswer({ exercise }: { exercise: Exercise }) {
   switch (exercise.kind) {
@@ -258,6 +383,8 @@ export function CorrectAnswer({ exercise }: { exercise: Exercise }) {
       );
     case 'wordbank':
       return <span className="font-semibold">{exercise.answer.join(' ')}</span>;
+    case 'speak':
+      return <span className="font-semibold">{exercise.text}</span>;
     default:
       return null;
   }

@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { CONSONANT_GROUPS, CONTRAST_PAIRS, NIGGAHITA_LETTER, VOWELS } from '../content/alphabet';
 import { GRAMMAR } from '../content/grammar';
 import { VOCAB } from '../content/vocab';
+import { posLabel } from '../content/tags';
 import { paradigmTable } from '../lib/exercises';
-import { looseKey, toKhmer } from '../lib/pali';
+import { khmerNumber, looseKey, toKhmer } from '../lib/pali';
 import { speak } from '../lib/audio';
 import { navigate } from '../lib/router';
 import { useStore } from '../lib/store';
@@ -166,14 +167,14 @@ function DictionaryTab() {
         className="mb-4 w-full rounded-xl border-2 border-stone-200 px-4 py-3 outline-none focus:border-sky-400"
       />
       <p className="mb-2 text-xs text-stone-500">
-        រកឃើញ {results.length} ពាក្យ ក្នុងចំណោម {VOCAB.length}
+        រកឃើញ {khmerNumber(results.length)} ពាក្យ ក្នុងចំណោម {khmerNumber(VOCAB.length)}
       </p>
       <div className="space-y-2">
         {results.map((v) => (
           <div key={v.id} className="card px-4 py-3">
             <div className="flex items-baseline justify-between gap-3">
               <ScriptText pali={v.pali} className="text-lg font-semibold" />
-              <span className="shrink-0 text-xs text-stone-400">{v.pos}</span>
+              <span className="shrink-0 text-xs text-stone-400">{posLabel(v.pos)}</span>
             </div>
             <p className="mt-1 text-stone-700">{v.km}</p>
             <p className="text-sm text-stone-500">{v.en}</p>

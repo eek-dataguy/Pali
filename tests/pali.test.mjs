@@ -71,3 +71,11 @@ test('loose matching folds every Pali diacritic', () => {
 test('numbers render in Khmer numerals', () => {
   assert.equal(khmerNumber(2569), '២៥៦៩');
 });
+
+test('speech similarity is a hint, not a verdict', async () => {
+  const { similarity } = await import('../src/lib/speech.ts');
+  assert.equal(similarity('buddha', 'buddha'), 1);
+  assert.ok(similarity('buddha', 'budha') > 0.7);
+  assert.ok(similarity('buddha', 'xyzzy') < 0.3);
+  assert.equal(similarity('buddha', ''), 0);
+});

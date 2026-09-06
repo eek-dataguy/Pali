@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import type { Exercise } from '../lib/exercises';
 import { NO_ANSWER, hasAnswer, judge, type Answer } from '../lib/judge';
+import { khmerNumber } from '../lib/pali';
 import { useStore } from '../lib/store';
 import { CorrectAnswer, ExerciseView } from './ExerciseView';
 import { Bar, Pill } from './ui';
@@ -105,7 +106,7 @@ export function LessonRunner({
             ✕
           </button>
           <Bar value={progress} />
-          {stats.combo >= 3 && <Pill tone="saffron">🔥 {stats.combo}</Pill>}
+          {stats.combo >= 3 && <Pill tone="saffron">🔥 {khmerNumber(stats.combo)}</Pill>}
         </div>
       </header>
 
@@ -186,9 +187,9 @@ function Summary({
       <h2 className="text-2xl font-bold">មេរៀនចប់ហើយ!</h2>
       <p className="text-stone-500">{title}</p>
       <div className="grid w-full max-w-sm grid-cols-3 gap-3">
-        <Stat label="ពិន្ទុ" value={`+${xp}`} tone="text-saffron-600" />
-        <Stat label="ត្រឹមត្រូវ" value={`${accuracy}%`} tone="text-leaf-600" />
-        <Stat label="រយៈពេល" value={`${Math.max(1, Math.round(seconds / 60))} នាទី`} tone="text-sky-600" />
+        <Stat label="ពិន្ទុ" value={`+${khmerNumber(xp)}`} tone="text-saffron-600" />
+        <Stat label="ត្រឹមត្រូវ" value={`${khmerNumber(accuracy)}%`} tone="text-leaf-600" />
+        <Stat label="រយៈពេល" value={`${khmerNumber(Math.max(1, Math.round(seconds / 60)))} នាទី`} tone="text-sky-600" />
       </div>
       {stats.bestCombo >= 5 && (
         <p className="text-stone-600">🔥 ឆ្លើយត្រូវជាប់គ្នា {stats.bestCombo} ដង</p>

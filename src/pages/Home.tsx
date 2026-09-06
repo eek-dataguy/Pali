@@ -44,7 +44,7 @@ export default function Home() {
           </div>
           <button type="button" onClick={() => navigate('/profile')} aria-label="គោលដៅប្រចាំថ្ងៃ">
             <ProgressRing value={goal} color="#ff7f11">
-              {Math.round(goal * 100)}%
+              {khmerNumber(Math.round(goal * 100))}%
             </ProgressRing>
           </button>
         </div>
@@ -123,7 +123,7 @@ function UnitBlock({ unit, lessons }: { unit: Unit; lessons: Record<string, { co
         <p className="mt-1 text-sm opacity-90">{unit.kmGoal}</p>
         <div className="mt-2.5 flex items-center gap-2">
           <Bar value={progress} className="bg-white/30" />
-          <span className="text-xs font-semibold">{Math.round(progress * 100)}%</span>
+          <span className="text-xs font-semibold">{khmerNumber(Math.round(progress * 100))}%</span>
         </div>
       </div>
 
