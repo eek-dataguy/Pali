@@ -4,7 +4,8 @@ import type { Exercise } from '../lib/exercises';
 import { seededRandom } from '../lib/util';
 import { useStore } from '../lib/store';
 import { navigate } from '../lib/router';
-import { ExerciseView, type Judgement } from '../components/ExerciseView';
+import { ExerciseView } from '../components/ExerciseView';
+import { NO_ANSWER, hasAnswer, judge, type Answer } from '../lib/judge';
 import { Bar } from '../components/ui';
 
 /**
@@ -164,15 +165,9 @@ function Placement({ onDone }: { onDone: (unlockThrough: string | null) => void 
     [rand],
   );
   const [index, setIndex] = useState(0);
-  const [checked, setChecked] = useState<Judgement | null>(null);
-  const [ready, setReady] = useState(false);
+  const [answer, setAnswer] = useState<Answer>(NO_ANSWER);
+  const [checked, setChecked] = useState<{ correct: boolean } | null>(null);
   const [lastCorrect, setLastCorrect] = useState<number>(-1);
-  const judgeRef = useMemo(() => ({ current: null as null | (() => Judgement) }), []);
-
-  const onReady = useMemo(
-    () => (r: boolean, j: () => Judgement) => { judgeRef.current = j; setReady(r); },
-    [judgeRef],
-  );
 
   const current = questions[index];
   if (!current) {
@@ -190,19 +185,24 @@ function Placement({ onDone }: { onDone: (unlockThrough: string | null) => void 
       </div>
 
       <div className="flex-1">
-        <ExerciseView exercise={current} checked={checked} onReady={onReady} />
+        <ExerciseView
+          exercise={current}
+          answer={answer}
+          onAnswer={setAnswer}
+          revealed={checked !== null}
+          correct={checked?.correct ?? false}
+        />
       </div>
 
       <div className="pt-6">
         {checked === null ? (
           <button
             type="button"
-            disabled={!ready}
+            disabled={!hasAnswer(answer)}
             onClick={() => {
-              const result = judgeRef.current?.();
-              if (!result) return;
-              setChecked(result);
-              if (result.correct) setLastCorrect(index);
+              const correct = judge(current, answer);
+              setChecked({ correct });
+              if (correct) setLastCorrect(index);
             }}
             className="btn-primary w-full text-lg"
           >
@@ -211,7 +211,7 @@ function Placement({ onDone }: { onDone: (unlockThrough: string | null) => void 
         ) : (
           <button
             type="button"
-            onClick={() => { setChecked(null); setReady(false); setIndex((i) => i + 1); }}
+            onClick={() => { setChecked(null); setAnswer(NO_ANSWER); setIndex((i) => i + 1); }}
             className="btn-primary w-full text-lg"
           >
             បន្ត

@@ -1,55 +1,50 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Exercise } from '../lib/exercises';
-import { paliEquals, toKhmer } from '../lib/pali';
+import type { Answer } from '../lib/judge';
+import { toKhmer } from '../lib/pali';
 import { speak } from '../lib/audio';
 import { useStore } from '../lib/store';
-import { DataTable, ScriptHeading, ScriptText } from './ui';
+import { DataTable, ScriptHeading } from './ui';
 
 /**
- * Renders a single exercise and reports whether the learner got it right.
- *
- * The component is controlled by LessonRunner: it owns nothing about
- * progression, only about how one question looks and how its answer is judged.
+ * Renders one exercise as a fully controlled component: the current answer
+ * comes in as a prop and every change goes straight back out. The component
+ * holds no answer state of its own, so it cannot disagree with the runner
+ * about what the learner has chosen.
  */
-
-export type Judgement = { correct: boolean; given: string };
 
 const DIACRITICS = ['ā', 'ī', 'ū', 'ṃ', 'ṅ', 'ñ', 'ṭ', 'ḍ', 'ṇ', 'ḷ'];
 
-export function ExerciseView({
-  exercise, checked, onReady,
-}: {
+export type ExerciseViewProps = {
   exercise: Exercise;
-  /** Set once the learner has pressed check; locks the controls. */
-  checked: Judgement | null;
-  /** Reports whether an answer is selected, and how to judge it when asked. */
-  onReady: (ready: boolean, judge: () => Judgement) => void;
-}) {
-  switch (exercise.kind) {
+  answer: Answer;
+  onAnswer: (answer: Answer) => void;
+  /** True once the answer has been checked; locks the controls. */
+  revealed: boolean;
+  correct: boolean;
+};
+
+export function ExerciseView(props: ExerciseViewProps) {
+  switch (props.exercise.kind) {
     case 'teach':
-      return <TeachCard exercise={exercise} onReady={onReady} />;
+      return <TeachCard exercise={props.exercise} />;
     case 'choice':
     case 'listen':
-      return <ChoiceCard exercise={exercise} checked={checked} onReady={onReady} />;
+      return <ChoiceCard {...props} exercise={props.exercise} />;
     case 'type':
-      return <TypeCard exercise={exercise} checked={checked} onReady={onReady} />;
+      return <TypeCard {...props} exercise={props.exercise} />;
     case 'wordbank':
-      return <WordBankCard exercise={exercise} checked={checked} onReady={onReady} />;
-    case 'match':
-      return <div className="text-stone-500">…</div>;
+      return <WordBankCard {...props} exercise={props.exercise} />;
+    default:
+      return null;
   }
 }
 
 /* --------------------------------------------------------------- teaching */
 
-function TeachCard({
-  exercise, onReady,
-}: { exercise: Extract<Exercise, { kind: 'teach' }>; onReady: (r: boolean, j: () => Judgement) => void }) {
+function TeachCard({ exercise }: { exercise: Extract<Exercise, { kind: 'teach' }> }) {
   const audio = useStore((s) => s.profile.audio);
   const rate = useStore((s) => s.profile.speechRate);
-  useEffect(() => {
-    onReady(true, () => ({ correct: true, given: '' }));
-  }, [exercise.id, onReady]);
 
   return (
     <div className="space-y-4">
@@ -80,32 +75,20 @@ function TeachCard({
   );
 }
 
-/* ----------------------------------------------------------- multiple choice */
+/* --------------------------------------------------------- multiple choice */
 
 function ChoiceCard({
-  exercise, checked, onReady,
-}: {
-  exercise: Extract<Exercise, { kind: 'choice' | 'listen' }>;
-  checked: Judgement | null;
-  onReady: (r: boolean, j: () => Judgement) => void;
-}) {
-  const [selected, setSelected] = useState<number | null>(null);
+  exercise, answer, onAnswer, revealed,
+}: ExerciseViewProps & { exercise: Extract<Exercise, { kind: 'choice' | 'listen' }> }) {
   const rate = useStore((s) => s.profile.speechRate);
   const isListen = exercise.kind === 'listen';
+  const selected = answer.kind === 'choice' ? answer.index : -1;
 
-  useEffect(() => setSelected(null), [exercise.id]);
-
-  useEffect(() => {
-    onReady(selected !== null, () => ({
-      correct: selected !== null && exercise.answers.includes(selected),
-      given: selected !== null ? exercise.options[selected].text : '',
-    }));
-  }, [selected, exercise, onReady]);
-
-  /* Play the prompt automatically the first time a listening item appears. */
+  /* Play a listening prompt once when it first appears. */
   useEffect(() => {
     if (isListen) speak(exercise.speak, rate);
-  }, [exercise.id, isListen, rate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exercise.id]);
 
   return (
     <div className="space-y-5">
@@ -115,7 +98,7 @@ function ChoiceCard({
           <button
             type="button"
             onClick={() => speak(exercise.speak, rate)}
-            className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-sky-500 text-4xl text-white shadow-[0_5px_0_#0369a1] active:translate-y-1 active:shadow-[0_2px_0_#0369a1]"
+            className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-sky-500 text-4xl text-white shadow-[0_5px_0_#0369a1] active:translate-y-1"
             aria-label="ស្តាប់ម្តងទៀត"
           >
             🔊
@@ -135,9 +118,8 @@ function ChoiceCard({
       <div className="grid gap-3">
         {exercise.options.map((opt, i) => {
           const isChosen = selected === i;
-          const reveal = checked !== null;
           const isRight = exercise.answers.includes(i);
-          const cls = reveal
+          const cls = revealed
             ? isRight ? 'option option-correct'
               : isChosen ? 'option option-wrong' : 'option opacity-60'
             : isChosen ? 'option option-selected' : 'option';
@@ -145,8 +127,8 @@ function ChoiceCard({
             <button
               key={`${exercise.id}:${i}`}
               type="button"
-              disabled={reveal}
-              onClick={() => setSelected(i)}
+              disabled={revealed}
+              onClick={() => onAnswer({ kind: 'choice', index: i })}
               className={cls}
             >
               <span className="text-lg font-medium">{opt.text}</span>
@@ -162,31 +144,12 @@ function ChoiceCard({
 /* ------------------------------------------------------------------ typing */
 
 function TypeCard({
-  exercise, checked, onReady,
-}: {
-  exercise: Extract<Exercise, { kind: 'type' }>;
-  checked: Judgement | null;
-  onReady: (r: boolean, j: () => Judgement) => void;
-}) {
-  const [text, setText] = useState('');
+  exercise, answer, onAnswer, revealed, correct,
+}: ExerciseViewProps & { exercise: Extract<Exercise, { kind: 'type' }> }) {
   const ref = useRef<HTMLInputElement>(null);
+  const value = answer.kind === 'text' ? answer.value : '';
 
-  useEffect(() => {
-    setText('');
-    ref.current?.focus();
-  }, [exercise.id]);
-
-  useEffect(() => {
-    onReady(text.trim().length > 0, () => ({
-      correct: judgeTyped(text, exercise),
-      given: text.trim(),
-    }));
-  }, [text, exercise, onReady]);
-
-  const insert = (ch: string) => {
-    setText((t) => t + ch);
-    ref.current?.focus();
-  };
+  useEffect(() => { ref.current?.focus(); }, [exercise.id]);
 
   return (
     <div className="space-y-4">
@@ -194,24 +157,27 @@ function TypeCard({
       {exercise.promptSub && <p className="text-sm text-stone-500">{exercise.promptSub}</p>}
       <input
         ref={ref}
-        value={text}
-        disabled={checked !== null}
-        onChange={(e) => setText(e.target.value)}
+        value={value}
+        disabled={revealed}
+        onChange={(e) => onAnswer({ kind: 'text', value: e.target.value })}
         placeholder="សរសេរចម្លើយនៅទីនេះ…"
         autoComplete="off"
         autoCapitalize="off"
         spellCheck={false}
         className={`w-full rounded-2xl border-2 px-4 py-4 text-xl outline-none transition
-          ${checked === null ? 'border-stone-200 focus:border-sky-400'
-            : checked.correct ? 'border-leaf-400 bg-leaf-50' : 'border-red-400 bg-red-50'}`}
+          ${!revealed ? 'border-stone-200 focus:border-sky-400'
+            : correct ? 'border-leaf-400 bg-leaf-50' : 'border-red-400 bg-red-50'}`}
       />
-      {exercise.isPali && checked === null && (
+      {exercise.isPali && !revealed && (
         <div className="flex flex-wrap gap-2">
           {DIACRITICS.map((ch) => (
             <button
               key={ch}
               type="button"
-              onClick={() => insert(ch)}
+              onClick={() => {
+                onAnswer({ kind: 'text', value: value + ch });
+                ref.current?.focus();
+              }}
               className="pali-iast rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-lg shadow-sm active:scale-95"
             >
               {ch}
@@ -223,39 +189,13 @@ function TypeCard({
   );
 }
 
-/** Accepts diacritic-free romanisation and Khmer script, per accept list. */
-function judgeTyped(text: string, exercise: Extract<Exercise, { kind: 'type' }>): boolean {
-  const given = text.trim();
-  if (!given) return false;
-  if (!exercise.isPali) {
-    const norm = (s: string) => s.replace(/\s+/g, ' ').replace(/[។.]/g, '').trim();
-    return norm(given) === norm(exercise.answer);
-  }
-  return exercise.accept.some((a) => paliEquals(a, given)) || paliEquals(exercise.answer, given);
-}
-
 /* --------------------------------------------------------------- word bank */
 
 function WordBankCard({
-  exercise, checked, onReady,
-}: {
-  exercise: Extract<Exercise, { kind: 'wordbank' }>;
-  checked: Judgement | null;
-  onReady: (r: boolean, j: () => Judgement) => void;
-}) {
-  const [picked, setPicked] = useState<number[]>([]);
-
-  useEffect(() => setPicked([]), [exercise.id]);
-
-  useEffect(() => {
-    const built = picked.map((i) => exercise.bank[i]);
-    onReady(picked.length > 0, () => ({
-      correct: built.join(' ') === exercise.answer.join(' '),
-      given: built.join(' '),
-    }));
-  }, [picked, exercise, onReady]);
-
-  const available = exercise.bank.map((w, i) => ({ w, i })).filter(({ i }) => !picked.includes(i));
+  exercise, answer, onAnswer, revealed, correct,
+}: ExerciseViewProps & { exercise: Extract<Exercise, { kind: 'wordbank' }> }) {
+  const order = answer.kind === 'bank' ? answer.order : [];
+  const available = exercise.bank.map((w, i) => ({ w, i })).filter(({ i }) => !order.includes(i));
 
   return (
     <div className="space-y-5">
@@ -268,16 +208,16 @@ function WordBankCard({
 
       <div
         className={`min-h-[4.5rem] rounded-2xl border-2 border-dashed px-3 py-3 transition
-          ${checked === null ? 'border-stone-300'
-            : checked.correct ? 'border-leaf-400 bg-leaf-50' : 'border-red-400 bg-red-50'}`}
+          ${!revealed ? 'border-stone-300'
+            : correct ? 'border-leaf-400 bg-leaf-50' : 'border-red-400 bg-red-50'}`}
       >
         <div className="flex flex-wrap gap-2">
-          {picked.map((bankIndex, position) => (
+          {order.map((bankIndex, position) => (
             <button
               key={`${bankIndex}-${position}`}
               type="button"
-              disabled={checked !== null}
-              onClick={() => setPicked((p) => p.filter((_, k) => k !== position))}
+              disabled={revealed}
+              onClick={() => onAnswer({ kind: 'bank', order: order.filter((_, k) => k !== position) })}
               className="rounded-xl border border-stone-300 bg-white px-3 py-2 shadow-sm active:scale-95"
             >
               {exercise.bank[bankIndex]}
@@ -291,8 +231,8 @@ function WordBankCard({
           <button
             key={i}
             type="button"
-            disabled={checked !== null}
-            onClick={() => setPicked((p) => [...p, i])}
+            disabled={revealed}
+            onClick={() => onAnswer({ kind: 'bank', order: [...order, i] })}
             className="rounded-xl border border-stone-200 bg-white px-3 py-2 shadow-[0_2px_0_#e7e5e4] active:translate-y-[2px] active:shadow-none"
           >
             {w}
@@ -303,7 +243,7 @@ function WordBankCard({
   );
 }
 
-/** Shown in the feedback sheet after a wrong answer. */
+/** Shown in the feedback bar after a wrong answer. */
 export function CorrectAnswer({ exercise }: { exercise: Exercise }) {
   switch (exercise.kind) {
     case 'choice':
@@ -322,5 +262,3 @@ export function CorrectAnswer({ exercise }: { exercise: Exercise }) {
       return null;
   }
 }
-
-export { ScriptText };

@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import type { Exercise } from '../lib/exercises';
+import { NO_ANSWER, hasAnswer, judge, type Answer } from '../lib/judge';
 import { useStore } from '../lib/store';
-import { CorrectAnswer, ExerciseView, type Judgement } from './ExerciseView';
+import { CorrectAnswer, ExerciseView } from './ExerciseView';
 import { Bar, Pill } from './ui';
 
 /**
@@ -28,30 +29,24 @@ export function LessonRunner({
   onFinish: (result: LessonResult) => void;
   onQuit: () => void;
 }) {
-  const answer = useStore((s) => s.answer);
+  const record = useStore((s) => s.answer);
   const [queue, setQueue] = useState<Exercise[]>(exercises);
   const [position, setPosition] = useState(0);
-  const [checked, setChecked] = useState<Judgement | null>(null);
-  const [ready, setReady] = useState(false);
+  const [answer, setAnswer] = useState<Answer>(NO_ANSWER);
+  const [checked, setChecked] = useState<{ correct: boolean } | null>(null);
   const [stats, setStats] = useState({ answered: 0, correct: 0, combo: 0, bestCombo: 0 });
 
-  const judgeRef = useRef<(() => Judgement) | null>(null);
   const shownAt = useRef(Date.now());
   const startedAt = useRef(Date.now());
 
-  const onReady = useCallback((isReady: boolean, judge: () => Judgement) => {
-    judgeRef.current = judge;
-    setReady(isReady);
-  }, []);
-
   const current = queue[position];
+  const ready = current?.kind === 'teach' || hasAnswer(answer);
 
   const advance = useCallback((requeue: Exercise | null) => {
     setQueue((q) => (requeue ? [...q, requeue] : q));
     setPosition((p) => p + 1);
+    setAnswer(NO_ANSWER);
     setChecked(null);
-    setReady(false);
-    judgeRef.current = null;
     shownAt.current = Date.now();
   }, []);
 
@@ -70,23 +65,18 @@ export function LessonRunner({
   }
 
   const handleCheck = () => {
-    const judge = judgeRef.current;
-    if (!judge) return;
-    const result = judge();
-
     if (current.kind === 'teach') {
       advance(null);
       return;
     }
-
-    const ms = Date.now() - shownAt.current;
-    answer(current.card, result.correct, ms, current.tags);
-    setChecked(result);
+    const correct = judge(current, answer);
+    record(current.card, correct, Date.now() - shownAt.current, current.tags);
+    setChecked({ correct });
     setStats((s) => {
-      const combo = result.correct ? s.combo + 1 : 0;
+      const combo = correct ? s.combo + 1 : 0;
       return {
         answered: s.answered + 1,
-        correct: s.correct + (result.correct ? 1 : 0),
+        correct: s.correct + (correct ? 1 : 0),
         combo,
         bestCombo: Math.max(s.bestCombo, combo),
       };
@@ -114,7 +104,13 @@ export function LessonRunner({
 
       <main className="flex-1 px-4 py-6 pb-40">
         <div className="mx-auto w-full max-w-xl">
-          <ExerciseView exercise={current} checked={checked} onReady={onReady} />
+          <ExerciseView
+            exercise={current}
+            answer={answer}
+            onAnswer={setAnswer}
+            revealed={checked !== null}
+            correct={checked?.correct ?? false}
+          />
         </div>
       </main>
 
@@ -206,4 +202,3 @@ function Stat({ label, value, tone }: { label: string; value: string; tone: stri
   );
 }
 
-export { type Judgement };
