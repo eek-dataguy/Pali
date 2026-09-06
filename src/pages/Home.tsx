@@ -5,6 +5,7 @@ import {
   dueCount, goalProgress, isLessonComplete, isLessonUnlocked, nextLesson,
   todayStat, unitProgress, useStore, weakCardIds,
 } from '../lib/store';
+import { khmerNumber } from '../lib/pali';
 import { Bar, KhmerNumber, ProgressRing } from '../components/ui';
 
 /**
@@ -64,21 +65,22 @@ export default function Home() {
             onClick={() => navigate('/review')}
             icon="🔁"
             title="រំឭកឡើងវិញ"
-            sub={due ? `${due} សន្លឹកដល់ពេល` : 'គ្មានអ្វីត្រូវរំឭកទេ'}
+            sub={due ? `${khmerNumber(due)} សន្លឹកដល់ពេល` : 'គ្មានអ្វីត្រូវរំឭកទេ'}
           />
           <ActionCard
             disabled={weak === 0}
             onClick={() => navigate('/review/weak')}
             icon="🎯"
             title="ចំណុចខ្សោយ"
-            sub={weak ? `${weak} ចំណុចត្រូវពង្រឹង` : 'មិនទាន់មានទិន្នន័យ'}
+            sub={weak ? `${khmerNumber(weak)} ចំណុចត្រូវពង្រឹង` : 'មិនទាន់មានទិន្នន័យ'}
           />
         </div>
 
         {today.answers > 0 && (
           <p className="text-center text-xs text-stone-500">
-            ថ្ងៃនេះ៖ ឆ្លើយ {today.answers} សំណួរ · ត្រូវ {Math.round((today.correct / today.answers) * 100)}%
-            {' · '}{Math.max(1, Math.round(today.seconds / 60))} នាទី
+            ថ្ងៃនេះ៖ ឆ្លើយ {khmerNumber(today.answers)} សំណួរ · ត្រូវ{' '}
+            {khmerNumber(Math.round((today.correct / today.answers) * 100))}%
+            {' · '}{khmerNumber(Math.max(1, Math.round(today.seconds / 60)))} នាទី
           </p>
         )}
       </section>

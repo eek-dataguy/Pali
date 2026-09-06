@@ -158,41 +158,52 @@ export type Syllable = {
 };
 
 /**
- * Split a word into spoken syllables and mark each heavy or light. Pali metre —
- * and therefore correct chanting — depends on this distinction, so it drives the
- * chanting lessons as well as the pronunciation drills.
+ * Split a word into spoken syllables and mark each heavy or light.
+ *
+ * A syllable is heavy (គរុ) if it has a long vowel, a niggahita, or a closing
+ * consonant. Pali metre — and therefore correct chanting — rests entirely on
+ * this distinction, so the closing consonants are kept in the syllable's text:
+ * dhammā is dham-mā, not dha-mā.
  */
 export function syllabify(word: string): Syllable[] {
   const s = normalizeIast(word).toLowerCase().replace(/-/g, '');
-  const units = parseWord(s);
+  const back = new Map(CONSONANTS.map(([iast, khmer]) => [khmer, iast]));
   const out: Syllable[] = [];
-  for (const unit of units) {
+
+  for (const unit of parseWord(s)) {
     if (unit.kind === 'other') continue;
-    const consonants = unit.kind === 'cluster' ? unit.consonants.length : 0;
-    // Every consonant but the last closes the previous syllable.
-    if (consonants > 1 && out.length) out[out.length - 1].heavy = true;
-    if (!unit.vowel) {
-      if (unit.niggahita && out.length) out[out.length - 1].heavy = true;
+
+    if (unit.kind === 'cluster') {
+      const letters = unit.consonants.map((c) => back.get(c) ?? '');
+      // Every consonant but the last closes the syllable before it.
+      if (letters.length > 1 && out.length) {
+        const previous = out[out.length - 1];
+        previous.text += letters.slice(0, -1).join('');
+        previous.heavy = true;
+      }
+      if (!unit.vowel) {
+        if (unit.niggahita && out.length) {
+          out[out.length - 1].text += 'ṃ';
+          out[out.length - 1].heavy = true;
+        }
+        continue;
+      }
+      const onset = letters[letters.length - 1] ?? '';
+      out.push({
+        text: onset + unit.vowel + (unit.niggahita ? 'ṃ' : ''),
+        vowel: unit.vowel,
+        heavy: LONG_VOWELS.has(unit.vowel) || unit.niggahita,
+      });
       continue;
     }
-    const iastPieces = spellUnit(s, out.length, unit);
+
     out.push({
-      text: iastPieces,
+      text: unit.vowel + (unit.niggahita ? 'ṃ' : ''),
       vowel: unit.vowel,
       heavy: LONG_VOWELS.has(unit.vowel) || unit.niggahita,
     });
   }
   return out;
-}
-
-/** Re-spell one parsed unit back into IAST for display in syllable drills. */
-function spellUnit(_source: string, _index: number, unit: Unit): string {
-  if (unit.kind === 'other') return unit.text;
-  const back = new Map(CONSONANTS.map(([iast, khmer]) => [khmer, iast]));
-  const letters = unit.kind === 'cluster' ? unit.consonants.map((c) => back.get(c) ?? '') : [];
-  const onset = letters.length ? letters[letters.length - 1] : '';
-  const vowel = unit.kind === 'vowel' ? unit.vowel : unit.vowel ?? '';
-  return onset + vowel + (unit.niggahita ? 'ṃ' : '');
 }
 
 /** Strip every diacritic so a learner typing plain ASCII still gets credit. */

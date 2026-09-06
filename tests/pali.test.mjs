@@ -45,6 +45,17 @@ test('syllables are marked heavy or light for metre', () => {
   assert.deepEqual(syllables.map((s) => s.heavy), [false, true, false]);
 });
 
+test('a syllable keeps the consonant that closes it', () => {
+  // Metre depends on closed syllables, so dhammā must read dham-mā, not dha-mā.
+  assert.deepEqual(syllabify('dhammā').map((s) => s.text), ['dham', 'mā']);
+  assert.deepEqual(syllabify('anicca').map((s) => s.text), ['a', 'nic', 'ca']);
+  assert.deepEqual(
+    syllabify('manopubbaṅgamā').map((s) => s.text),
+    ['ma', 'no', 'pub', 'baṅ', 'ga', 'mā'],
+  );
+  assert.deepEqual(syllabify('sutaṃ').map((s) => s.text), ['su', 'taṃ']);
+});
+
 test('answers are accepted without diacritics or in Khmer script', () => {
   assert.ok(paliEquals('gacchāmi', 'gacchami'));
   assert.ok(paliEquals('dhammaṃ', 'dhammam'));

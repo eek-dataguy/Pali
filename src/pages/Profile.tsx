@@ -6,6 +6,7 @@ import {
   dueCount, fadingCards, overallMastery, recentActivity, reviewForecast,
   todayStat, useStore, weakTags,
 } from '../lib/store';
+import { khmerNumber } from '../lib/pali';
 import { Bar, KhmerNumber, Pill, ProgressRing } from '../components/ui';
 
 /**
@@ -62,9 +63,9 @@ export default function Profile() {
             {Math.round(overallMastery(cards) * 100)}%
           </ProgressRing>
           <div className="flex-1 text-sm text-stone-600">
-            <p>សន្លឹកចងចាំសរុប៖ {Object.keys(cards).length}</p>
+            <p>សន្លឹកចងចាំសរុប៖ {khmerNumber(Object.keys(cards).length)}</p>
             <p>ថ្ងៃជាប់គ្នាច្រើនបំផុត៖ <KhmerNumber value={bestStreak} /> ថ្ងៃ</p>
-            <p>ថ្ងៃនេះ៖ {today.answers} សំណួរ · {Math.max(0, Math.round(today.seconds / 60))} នាទី</p>
+            <p>ថ្ងៃនេះ៖ {khmerNumber(today.answers)} សំណួរ · {khmerNumber(Math.max(0, Math.round(today.seconds / 60)))} នាទី</p>
           </div>
         </div>
       </Section>
