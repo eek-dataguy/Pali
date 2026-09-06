@@ -1,8 +1,9 @@
-name: Build and deploy
+name: Deploy to GitHub Pages
 
+# Vercel deploys from the repository directly, so this workflow is manual only:
+# it exists for anyone who would rather publish to GitHub Pages instead, and
+# never fires on a push that Vercel is already handling.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

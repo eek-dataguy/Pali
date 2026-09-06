@@ -79,6 +79,32 @@ npm run preview    # serve the built site
 npm test           # unit tests for the script, morphology and SRS engines
 ```
 
+## Deploying
+
+The build is a static site, so it can be hosted anywhere.
+
+**Vercel** (configured, and the simplest path): import the repository at
+[vercel.com/new](https://vercel.com/new) and accept the defaults — `vercel.json`
+already sets the framework, the build and install commands, the output
+directory, immutable caching for hashed assets, and the SPA fallback. Nothing
+needs to be configured in the dashboard, and there are no environment
+variables or secrets to set. Or from a terminal:
+
+```bash
+npm i -g vercel
+vercel          # preview deployment
+vercel --prod   # production
+```
+
+The app is entirely client-side, so no serverless functions or database are
+involved. One header worth knowing about: `Permissions-Policy` allows the
+microphone for this origin only, which the recitation drills need.
+
+**GitHub Pages** is also supported, via the manually triggered
+*Deploy to GitHub Pages* workflow. It builds with `BASE_PATH` set to the
+repository name, since project pages are served from a subpath. Routing is
+hash-based precisely so that neither host needs rewrite rules.
+
 ## Privacy
 
 Everything is local-first. There is no account and no server: progress lives in
