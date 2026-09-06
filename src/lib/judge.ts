@@ -73,3 +73,23 @@ export function describeAnswer(exercise: Exercise, answer: Answer): string {
   }
   return '';
 }
+
+/**
+ * How many times one exercise may come back inside a single session.
+ *
+ * Wrong answers return to the end of the queue so a lesson is not finished
+ * while something in it is unlearned — but that retry has to be bounded, or a
+ * learner having a bad day is held in one lesson indefinitely. After the cap
+ * the scheduler brings the item back tomorrow, which is the right place for it.
+ */
+export const MAX_RETRIES = 2;
+
+/** Given how many times this exercise has already been missed, try again? */
+export function shouldRequeue(timesMissed: number): boolean {
+  return timesMissed < MAX_RETRIES;
+}
+
+/** Upper bound on questions in a session, so termination is guaranteed. */
+export function maxSessionLength(exerciseCount: number): number {
+  return exerciseCount * (MAX_RETRIES + 1);
+}

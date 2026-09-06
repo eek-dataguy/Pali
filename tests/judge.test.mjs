@@ -103,3 +103,12 @@ test('a lesson is generated deterministically from its seed', () => {
   const b = buildLesson(LESSON_BY_ID.get('l4_2'), { audio: false, seed: 5 });
   assert.deepEqual(a.map((x) => x.id), b.map((x) => x.id));
 });
+
+test('an exercise retried too often stops coming back', async () => {
+  const { shouldRequeue, maxSessionLength, MAX_RETRIES } = await import('../src/lib/judge.ts');
+  assert.equal(shouldRequeue(0), true, 'a first miss returns');
+  assert.equal(shouldRequeue(MAX_RETRIES - 1), true);
+  assert.equal(shouldRequeue(MAX_RETRIES), false, 'past the cap it is left to the scheduler');
+  // Termination: a session cannot exceed this many questions however badly it goes.
+  assert.equal(maxSessionLength(14), 42);
+});

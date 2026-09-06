@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import type { Exercise } from '../lib/exercises';
-import { NO_ANSWER, hasAnswer, judge, type Answer } from '../lib/judge';
+import { NO_ANSWER, hasAnswer, judge, shouldRequeue, type Answer } from '../lib/judge';
 import { khmerNumber } from '../lib/pali';
 import { useStore } from '../lib/store';
 import { CorrectAnswer, ExerciseView } from './ExerciseView';
@@ -17,8 +17,7 @@ import { Bar, Pill } from './ui';
  * tomorrow anyway, which is the right place for it.
  */
 
-/** How many times one exercise may come back inside a single session. */
-const MAX_RETRIES = 2;
+
 
 export type LessonResult = {
   answered: number;
@@ -141,7 +140,7 @@ export function LessonRunner({
               {'explain' in current && current.explain && (
                 <p className="mt-1 text-sm text-stone-600">{current.explain}</p>
               )}
-              {!checked.correct && (retries.current.get(current.id) ?? 0) < MAX_RETRIES && (
+              {!checked.correct && shouldRequeue(retries.current.get(current.id) ?? 0) && (
                 <p className="mt-1 text-xs text-stone-500">សំណួរនេះនឹងត្រលប់មកវិញនៅចុងមេរៀន។</p>
               )}
             </div>
@@ -159,7 +158,15 @@ export function LessonRunner({
           ) : (
             <button
               type="button"
-              onClick={() => advance(checked.correct ? null : current)}
+              onClick={() => {
+                if (checked.correct) {
+                  advance(null);
+                  return;
+                }
+                const seen = retries.current.get(current.id) ?? 0;
+                retries.current.set(current.id, seen + 1);
+                advance(shouldRequeue(seen) ? current : null);
+              }}
               className="btn-primary w-full text-lg"
             >
               បន្ត
