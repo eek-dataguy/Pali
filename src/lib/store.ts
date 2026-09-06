@@ -195,6 +195,19 @@ export const useStore = create<State>()(
       name: 'pali-khmer-progress',
       version: 1,
       storage: createJSONStorage(() => localStorage),
+      /**
+       * Fill in settings a saved profile predates. Without this, adding a new
+       * preference would leave every existing learner with it undefined, and
+       * the feature it controls silently switched off.
+       */
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<State>;
+        return {
+          ...current,
+          ...saved,
+          profile: { ...current.profile, ...(saved.profile ?? {}) },
+        };
+      },
     },
   ),
 );
